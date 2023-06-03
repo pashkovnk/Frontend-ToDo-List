@@ -12,9 +12,9 @@
               <h3 class="text-h4"><b>Название:</b> {{ card.title }}</h3>
             </v-card-title>
             <v-card-text>
-              <p class="text-body-1"><b>Выполнено:</b> {{ card.completed }}</p>
-              <p class="text-body-1"><b>ID карточки:</b> {{ card.id }}</p>
-              <p class="text-body-1"><b>ID пользователя:</b> {{ card.userId }}</p>
+              <p class="text-body-1"><b>Выполнено:</b> {{ card.description }}</p>
+              <p class="text-body-1"><b>Описание:</b> {{ card.isDone }}</p>
+              <p class="text-body-1"><b>ID Карточки:</b> {{ card.id }}</p>
             </v-card-text>
             <v-card-actions>
               <v-btn variant="outlined" v-on:click="deleteCard(card.id)">
@@ -26,17 +26,19 @@
       </v-row>  
     </v-container>
   </template>
+
+
   <script>
   export default {
     name: 'List-cards',
     data() {
       return {
-        cardsList: []
+        cardsList: [],
       };
     },
     methods:{
       fetchCards() {
-        const data = fetch('https://jsonplaceholder.typicode.com/todos', {
+        const data = fetch('http://localhost:3000/api/todos', {
           method: 'GET'
         })
             .then((response) => response.json())
