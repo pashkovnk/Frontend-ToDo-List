@@ -1,61 +1,65 @@
 <template>
-    <v-container>
-      <v-row class="cards-title">
-        <v-col>
-          <h1 class="text-center text-h1">Карточки</h1>
-        </v-col>
-      </v-row>
-      <v-row class="list_cards">
-        <v-col md="12" v-for="card in cardsList" :key="card.id" class="card">
-          <v-card>
-            <v-card-title>
-              <h3 class="text-h4"><b>Название:</b> {{ card.title }}</h3>
-            </v-card-title>
-            <v-card-text>
-              <p class="text-body-1"><b>Выполнено:</b> {{ card.description }}</p>
-              <p class="text-body-1"><b>Описание:</b> {{ card.isDone }}</p>
-              <p class="text-body-1"><b>ID Карточки:</b> {{ card.id }}</p>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn variant="outlined" v-on:click="deleteCard(card.id)">
-                <b>Удалить</b>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>  
-    </v-container>
-  </template>
+  <v-container>
+    <v-row class="cards-title">
+      <v-col>
+        <h1 class="text-center text-h1">Карточки</h1>
+      </v-col>
+    </v-row>
+    <v-row class="list_cards">
+      <v-col md="12" v-for="card in cardsList" :key="card.id" class="card">
+        <v-card>
+          <v-card-title>
+            <h3 class="text-h4"><b>Название:</b> {{ card.title }}</h3>
+          </v-card-title>
+          <v-card-text>
+            <p class="text-body-1"><b>Выполнено:</b> {{ card.description }}</p>
+            <p class="text-body-1"><b>Описание:</b> {{ card.isDone }}</p>
+            <p class="text-body-1"><b>ID Карточки:</b> {{ card.id }}</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn v-on:click="deleteCard(card.id)">
+              <b>Удалить</b>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>  
+  </v-container>
+</template>
 
-
-  <script>
-  export default {
-    name: 'List-cards',
-    data() {
-      return {
-        cardsList: [],
-      };
+<script>
+export default {
+  name: "CardList",
+  data() {
+    return {
+      cardsList: [],
+    };
+  },
+  mounted() {
+    this.getCards();
+  },
+  methods: {
+    async getCards() {
+      try {
+        const response = await fetch("http://localhost:3000/api/todos");
+        const data = await response.json();
+        this.cardsList = data;
+      } catch (error) {
+        console.log(error);
+      }
     },
-    methods:{
-      fetchCards() {
-        const data = fetch('http://localhost:3000/api/todos', {
-          method: 'GET'
-        })
-            .then((response) => response.json())
-            .then((data) => {
-              this.cardsList = data;
-            });
-        console.log(data)
-      },
-      deleteCard(id){
-        const index = this.cardsList.findIndex(card => card.id === id);
-        if (index !== -1) {
-          this.cardsList.splice(index, 1);
-        }
-      },
+    async deleteCard(id) {
+      const index = this.cardsList.findIndex(card => card.id === id);
+      try {
+        await fetch(`http://localhost:3000/api/todos/${id}`, {
+          method: "DELETE",
+        });
+        this.cardsList.splice(index, 1);
+        this.getCards();
+      } catch (error) {
+        console.log(error);
+      }
     },
-    created() {
-        this.fetchCards();
-    },
-  }
-  </script>
+  },
+};
+</script>
