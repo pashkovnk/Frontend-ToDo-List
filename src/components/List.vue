@@ -54,7 +54,7 @@
           ></v-textarea>
           <v-checkbox type="checkbox" v-model="isDone" label="Выполнено"></v-checkbox>
         </v-form>
-        <v-btn v-bind:disabled="!title || !description" @click="createCard()">Добавить карточку
+        <v-btn @click="createCard()">Добавить карточку
         </v-btn>
       </v-col>
 
@@ -80,17 +80,10 @@
           ></v-textarea>
           <v-checkbox v-model="edit_isDone" label="Выполнено"></v-checkbox>
         </v-form>
-        <v-btn v-bind:disabled="!edit_title || !edit_description || !edit_id" @click="editCard(edit_title, edit_description, edit_isDone, edit_id)">Применить
+        <v-btn @click="editCard(edit_title, edit_description, edit_isDone, edit_id)">Применить
         </v-btn>
       </v-col>
     </v-row>
-
-
-    <v-row class="edit_card">
-      <v-col></v-col>
-    </v-row>
-
-
 
   </v-container>
 </template>
@@ -145,29 +138,32 @@ export default {
       }
     },
     async editCard(edit_title, edit_description, edit_isDone, edit_id) {
-      if (!this.edit_title || !this.edit_description) {
-    this.edit_valid = false;
-    return;
-  }
-  try {
-    const response = await fetch(`http://localhost:3000/api/todos/${edit_id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        title: edit_title,
-        description: edit_description,
-        isDone: edit_isDone
-      })
-    });
-    const updatedCard = await response.json();
-    const index = this.cardsList.findIndex(c => c.id === updatedCard.id);
-    this.cardsList.splice(index, 1, updatedCard);
-  } catch (error) {
-    console.log(error);
-  }
-},
+      if (!this.edit_title || !this.edit_description || !this.edit_id) {
+        this.edit_valid = false;
+        return;
+      }
+      try {
+        const response = await fetch(`http://localhost:3000/api/todos/${edit_id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            title: edit_title,
+            description: edit_description,
+            isDone: edit_isDone
+          })
+        });
+        const updatedCard = await response.json();
+        const index = this.cardsList.findIndex(c => c.id === updatedCard.id);
+        this.cardsList.splice(index, 1, updatedCard);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+
+
 async createCard() {
   if (!this.title || !this.description) {
     this.valid = false;
