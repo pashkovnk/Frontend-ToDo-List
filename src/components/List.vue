@@ -44,13 +44,11 @@
             v-model="title"
             :counter="255"
             label="Название"
-            required
           ></v-text-field>
           <v-textarea
             v-model="description"
             :counter="255"
             label="Описание"
-            required
           ></v-textarea>
           <v-checkbox type="checkbox" v-model="isDone" label="Выполнено"></v-checkbox>
         </v-form>
@@ -64,19 +62,16 @@
           <v-text-field
             v-model="edit_id"
             label="ID Карточки"
-            required
           ></v-text-field>
           <v-text-field
             v-model="edit_title"
             :counter="255"
             label="Название"
-            required
           ></v-text-field>
           <v-textarea
             v-model="edit_description"
             :counter="255"
             label="Описание"
-            required
           ></v-textarea>
           <v-checkbox v-model="edit_isDone" label="Выполнено"></v-checkbox>
         </v-form>
@@ -137,26 +132,31 @@ export default {
         console.log(error);
       }
     },
-    async editCard(edit_title, edit_description, edit_isDone, edit_id) {
+    async editCard() {
       if (!this.edit_title || !this.edit_description || !this.edit_id) {
         this.edit_valid = false;
         return;
       }
       try {
-        const response = await fetch(`http://localhost:3000/api/todos/${edit_id}`, {
+        const response = await fetch(`http://localhost:3000/api/todos/${this.edit_id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            title: edit_title,
-            description: edit_description,
-            isDone: edit_isDone
+            title: this.edit_title,
+            description: this.edit_description,
+            isDone: this.edit_isDone
           })
         });
         const updatedCard = await response.json();
         const index = this.cardsList.findIndex(c => c.id === updatedCard.id);
         this.cardsList.splice(index, 1, updatedCard);
+        this.edit_id = "";
+        this.edit_title = "";
+        this.edit_description = "";
+        this.edit_isDone = false;
+        this.edit_valid = true;
       } catch (error) {
         console.log(error);
       }
