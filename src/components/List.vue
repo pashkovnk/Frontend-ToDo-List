@@ -5,12 +5,20 @@
         <h1 class="text-center text-h1">Карточки</h1>
       </v-col>
     </v-row>
+
+
     <v-row class="delete-all-cards">
       <v-col>
-        <v-btn color="red" @click="deleteAllCards()">Удалить все</v-btn>
+        <v-btn color="red" @click="deleteAllCards()">Удалить все карточки</v-btn>
       </v-col>
     </v-row>
+
+
+
     <v-row class="list_cards">
+
+
+
       <v-col md="12" v-for="card in cardsList" :key="card.id" class="card">
         <v-card>
           <v-card-title>
@@ -21,30 +29,64 @@
             <p class="text-body-1"><b>Описание:</b> {{ card.description }}</p>
             <p class="text-body-1"><b>ID Карточки:</b> {{ card.id }}</p>
           </v-card-text>
-          <v-card-actions>
-            <v-btn v-on:click="deleteCard(card.id)">
-              <b>Удалить</b>
-            </v-btn>
-            <v-btn v-on:click="editCard(card.id)">
-              <b>Редактировать</b>
-            </v-btn>
-          </v-card-actions>
+
+
+
+          <v-dialog v-model="editDialog" max-width="500px">
+          <template v-slot:activator="{ on }">
+            <v-card-actions>
+              <v-btn v-on:click="deleteCard(card.id)">
+                <b>Удалить</b>
+              </v-btn>
+              <v-btn v-on="on">
+                <b>Редактировать</b>
+              </v-btn>
+            </v-card-actions>
+          </template>
+          <v-card>
+            <v-card-title>
+              <span class="headline">{{ editTitle }}</span>
+            </v-card-title>
+            <v-card-text>
+              <v-form ref="form" v-model="valid">
+                <v-text-field
+                  v-model.lazy="title"
+                  :counter="50"
+                  label="Название"
+                  required
+                ></v-text-field>
+                <v-textarea
+                  v-model.lazy="description"
+                  :counter="500"
+                  label="Описание"
+                  required
+                ></v-textarea>
+                <v-checkbox v-model="isDone" label="Выполнено"></v-checkbox>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" v-bind:disabled="!isFormValid" @click="editCard(title, description, isDone, card.id)">Сохранить изменения</v-btn>            </v-card-actions>
+          </v-card>
+        </v-dialog>
         </v-card>
       </v-col>
     </v-row>
+
+
+
     <v-row class="create_card">
       <v-col md="4">
         <h2 class="text-h2">Создать новую карточку</h2>
         <v-form ref="form" v-model="valid">
           <v-text-field
             v-model="title"
-            :counter="30"
+            :counter="50"
             label="Название"
             required
           ></v-text-field>
           <v-textarea
             v-model="description"
-            :counter="300"
+            :counter="500"
             label="Описание"
             required
           ></v-textarea>
@@ -54,6 +96,9 @@
         </v-btn>
       </v-col>
     </v-row>
+
+
+
   </v-container>
 </template>
 
@@ -72,6 +117,14 @@ export default {
   mounted() {
     this.getCards();
   },
+
+  // Для проверки наличия данных в обязательных полях
+  computed: {
+    isFormValid() {
+      return !!this.title && !!this.description;
+    },
+  },
+
   methods: {
     async getCards() {
       try {
@@ -105,17 +158,17 @@ export default {
         console.log(error);
       }
     },
-    async editCard(card) {
+    async editCard(title, description, isDone, id) {
   try {
-    const response = await fetch(`http://localhost:3000/api/todos/${card.id}`, {
+    const response = await fetch(`http://localhost:3000/api/todos/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        title: card.title,
-        description: card.description,
-        isDone: card.isDone
+        title: title,
+        description: description,
+        isDone: isDone
       })
     });
     const updatedCard = await response.json();
