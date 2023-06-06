@@ -17,8 +17,6 @@
 
     <v-row class="list_cards">
 
-
-
       <v-col md="12" v-for="card in cardsList" :key="card.id" class="card">
         <v-card>
           <v-card-title>
@@ -29,72 +27,67 @@
             <p class="text-body-1"><b>Описание:</b> {{ card.description }}</p>
             <p class="text-body-1"><b>ID Карточки:</b> {{ card.id }}</p>
           </v-card-text>
-
-
-
-          <v-dialog v-model="editDialog" max-width="500px">
-          <template v-slot:activator="{ on }">
-            <v-card-actions>
-              <v-btn v-on:click="deleteCard(card.id)">
-                <b>Удалить</b>
-              </v-btn>
-              <v-btn v-on="on">
-                <b>Редактировать</b>
-              </v-btn>
-            </v-card-actions>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ editTitle }}</span>
-            </v-card-title>
-            <v-card-text>
-              <v-form ref="form" v-model="valid">
-                <v-text-field
-                  v-model.lazy="title"
-                  :counter="50"
-                  label="Название"
-                  required
-                ></v-text-field>
-                <v-textarea
-                  v-model.lazy="description"
-                  :counter="500"
-                  label="Описание"
-                  required
-                ></v-textarea>
-                <v-checkbox v-model="isDone" label="Выполнено"></v-checkbox>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="primary" v-bind:disabled="!isFormValid" @click="editCard(title, description, isDone, card.id)">Сохранить изменения</v-btn>            </v-card-actions>
-          </v-card>
-        </v-dialog>
+          <v-card-actions>
+            <v-btn @click="deleteCard(card.id)">Удалить</v-btn>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
 
 
 
-    <v-row class="create_card">
-      <v-col md="4">
+    <v-row class="create_or_edit_card">
+      <v-col md="6">
         <h2 class="text-h2">Создать новую карточку</h2>
         <v-form ref="form" v-model="valid">
           <v-text-field
             v-model="title"
-            :counter="50"
+            :counter="255"
             label="Название"
             required
           ></v-text-field>
           <v-textarea
             v-model="description"
-            :counter="500"
+            :counter="255"
             label="Описание"
             required
           ></v-textarea>
-          <v-checkbox v-model="isDone" label="Выполнено"></v-checkbox>
+          <v-checkbox type="checkbox" v-model="isDone" label="Выполнено"></v-checkbox>
         </v-form>
         <v-btn v-bind:disabled="!title || !description" @click="createCard()">Добавить карточку
         </v-btn>
       </v-col>
+
+      <v-col md="6">
+        <h2 class="text-h2">Редактировать карточку по ID</h2>
+        <v-form ref="form" v-model="edit_valid">
+          <v-text-field
+            v-model="edit_id"
+            label="ID Карточки"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="edit_title"
+            :counter="255"
+            label="Название"
+            required
+          ></v-text-field>
+          <v-textarea
+            v-model="edit_description"
+            :counter="255"
+            label="Описание"
+            required
+          ></v-textarea>
+          <v-checkbox v-model="edit_isDone" label="Выполнено"></v-checkbox>
+        </v-form>
+        <v-btn v-bind:disabled="!edit_title || !edit_description || !edit_id" @click="editCard(edit_title, edit_description, edit_isDone, edit_id)">Применить
+        </v-btn>
+      </v-col>
+    </v-row>
+
+
+    <v-row class="edit_card">
+      <v-col></v-col>
     </v-row>
 
 
@@ -116,13 +109,6 @@ export default {
   },
   mounted() {
     this.getCards();
-  },
-
-  // Для проверки наличия данных в обязательных полях
-  computed: {
-    isFormValid() {
-      return !!this.title && !!this.description;
-    },
   },
 
   methods: {
@@ -158,17 +144,21 @@ export default {
         console.log(error);
       }
     },
-    async editCard(title, description, isDone, id) {
+    async editCard(edit_title, edit_description, edit_isDone, edit_id) {
+      if (!this.edit_title || !this.edit_description) {
+    this.edit_valid = false;
+    return;
+  }
   try {
-    const response = await fetch(`http://localhost:3000/api/todos/${id}`, {
+    const response = await fetch(`http://localhost:3000/api/todos/${edit_id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        title: title,
-        description: description,
-        isDone: isDone
+        title: edit_title,
+        description: edit_description,
+        isDone: edit_isDone
       })
     });
     const updatedCard = await response.json();
@@ -204,6 +194,7 @@ async createCard() {
     console.log(error);
   }
 },
+
   },
 };
 </script>
